@@ -24,7 +24,7 @@ fullname:{
   index:true,
 }, 
 avatar:{
-  type:String,//cloudnery url use,
+  type:String,
   required:true,
 },
 coverImage:{
@@ -32,7 +32,7 @@ coverImage:{
 },
 watchHistory:[
   {
-    type:Schema.type.ObjectId,
+    type:Schema.Types.ObjectId,
     ref:"Video",
   }
 ],
@@ -46,9 +46,10 @@ type:String,
 },{timestamps:true})
 
 userSchema.pre("save",async function(next){
-  if(!this.isModified("password"))return next();
+  if(!this.isModified("password")) return next();
   this.password=await bcrypt.hash(this.password,10)
-  this()
+  next()
+ 
 })
 
 userSchema.methods.isPasswordCorrect=async function(password){
@@ -57,7 +58,7 @@ return await bcrypt.compare(password,this.password)
 
 userSchema.methods.generateAccessToken=function(){
   jwt.sign({
-    _id:thid._id,
+    _id:this._id,
     email:this.email,
     username:this.username,
     fullname:this.fullname
@@ -69,7 +70,7 @@ userSchema.methods.generateAccessToken=function(){
 )
 }
 userSchema.methods.generateRefreshToken=function(){
-  jwt.sign({
+  return jwt.sign({
     _id:thid._id,
   },
   process.env.REFRESH_TOKEN_SECRET,
